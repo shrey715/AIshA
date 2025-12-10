@@ -1,0 +1,7 @@
+LLM.md
+.shell_history
+.vscode/
+test.txt
+*.out
+shell.tcl
+
