@@ -18,6 +18,12 @@ static void init_log_path(void) {
     free(current_directory);
 }
 
+void log_init(void) {
+    g_command_log.count = 0;
+    g_command_log.head = 0;
+    log_load_history();
+}
+
 void log_load_history(void) {
     init_log_path();
     

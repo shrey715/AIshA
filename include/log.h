@@ -15,6 +15,7 @@ typedef struct {
 extern command_log_t g_command_log;
 
 // Log functions
+void log_init(void);
 void log_add_command(const char* command);
 void log_load_history(void);
 void log_save_history(void);
