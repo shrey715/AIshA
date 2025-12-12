@@ -9,26 +9,25 @@
 
 void shell_init(void) {
     /* Get home directory */
-    char* home = getenv("HOME");
-    if (home) {
-        g_home_directory = strdup(home);
+    struct passwd* pw = getpwuid(getuid());
+    if (pw && pw->pw_dir) {
+        g_home_directory = strdup(pw->pw_dir);
     } else {
-        struct passwd* pw = getpwuid(getuid());
-        if (pw && pw->pw_dir) {
-            g_home_directory = strdup(pw->pw_dir);
+        char* home = getenv("HOME");
+        if (home) {
+            g_home_directory = strdup(home);
         } else {
             g_home_directory = strdup("/");
         }
     }
     
     /* Get username */
-    char* user = getenv("USER");
-    if (user) {
-        g_username = strdup(user);
+    if (pw && pw->pw_name) {
+        g_username = strdup(pw->pw_name);
     } else {
-        struct passwd* pw = getpwuid(getuid());
-        if (pw && pw->pw_name) {
-            g_username = strdup(pw->pw_name);
+        char* user = getenv("USER");
+        if (user) {
+            g_username = strdup(user);
         } else {
             g_username = strdup("user");
         }

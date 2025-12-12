@@ -338,7 +338,7 @@ char* expand_variable_reference(const char* ref, size_t* consumed) {
         
         size_t namelen = p - start;
         if (namelen >= MAX_VAR_NAME_LENGTH) namelen = MAX_VAR_NAME_LENGTH - 1;
-        strncpy(varname, start, namelen);
+        if (namelen > 0) memcpy(varname, start, namelen);
         varname[namelen] = '\0';
         
         /* Check for modifiers */

@@ -29,6 +29,7 @@ int execute_pipeline(pipeline_t* pipeline) {
 
     int pipe_fds[pipeline->command_count - 1][2];
     pid_t pids[pipeline->command_count];
+    memset(pids, 0, sizeof(pids));
 
     /* Create all pipes */
     for (int i = 0; i < pipeline->command_count - 1; i++) {

@@ -115,7 +115,7 @@ static void get_word_to_complete(const char* line, int cursor,
     /* Extract the word */
     int len = cursor - start;
     *word = malloc(len + 1);
-    strncpy(*word, line + start, len);
+    if (len > 0) memcpy(*word, line + start, len);
     (*word)[len] = '\0';
     *word_start = start;
 }
@@ -303,7 +303,7 @@ int complete_line(char* buffer, int* length, int* cursor) {
     
     if (result->count == 0) {
         /* No completions - beep */
-        write(STDOUT_FILENO, "\a", 1);
+        if (write(STDOUT_FILENO, "\a", 1)) { /* beep */ }
         completion_free(result);
         return 0;
     }
@@ -360,7 +360,7 @@ int complete_line(char* buffer, int* length, int* cursor) {
             }
         } else {
             /* Show all completions */
-            write(STDOUT_FILENO, "\n", 1);
+            if (write(STDOUT_FILENO, "\n", 1)) { /* newline */ }
             
             int term_width = 80;
             int max_len = 0;

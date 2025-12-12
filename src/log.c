@@ -12,6 +12,9 @@ static void init_log_path(void) {
     if (g_log_file_path) return;
 
     char* current_directory = get_current_directory();
+    if (!current_directory) {
+        current_directory = strdup("/tmp");
+    }
     size_t path_len = strlen(current_directory) + 20;
     g_log_file_path = malloc(path_len);
     snprintf(g_log_file_path, path_len, "%s/.shell_history", current_directory);
@@ -41,8 +44,7 @@ void log_load_history(void) {
             line[len-1] = '\0';
         }
         
-        strncpy(g_command_log.commands[g_command_log.count], line, LOG_MAX_COMMAND_LENGTH - 1);
-        g_command_log.commands[g_command_log.count][LOG_MAX_COMMAND_LENGTH - 1] = '\0';
+        snprintf(g_command_log.commands[g_command_log.count], LOG_MAX_COMMAND_LENGTH, "%s", line);
         g_command_log.count++;
     }
     

@@ -77,7 +77,7 @@ debug: CFLAGS += -g -DDEBUG -O0
 debug: clean $(TARGET)
 
 # Release build with optimizations
-release: CFLAGS += -O2 -DNDEBUG
+release: CFLAGS += -O2 -DNDEBUG -Wno-unused-result
 release: clean $(TARGET)
 
 # Clean build artifacts

@@ -1,9 +1,30 @@
 #include "directory.h"
 #include "shell.h"
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
+#include <limits.h>
 
 char* get_current_directory(void) {
     char* cwd = getcwd(NULL, 0);
-    return cwd;
+    if (cwd) {
+        return cwd;
+    }
+    
+    /* getcwd() failed - try /proc/self/cwd on Linux */
+    char buf[PATH_MAX];
+    ssize_t len = readlink("/proc/self/cwd", buf, sizeof(buf) - 1);
+    if (len > 0) {
+        buf[len] = '\0';
+        return strdup(buf);
+    }
+    
+    /* Final fallback: use home directory or "/" */
+    if (g_home_directory) {
+        return strdup(g_home_directory);
+    }
+    
+    return strdup("/");
 }
 
 char* get_parent_directory(void) {
