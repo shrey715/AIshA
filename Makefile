@@ -100,6 +100,31 @@ run: $(TARGET)
 memcheck: debug
 	valgrind --leak-check=full --show-leak-kinds=all ./$(TARGET)
 
+# Run with valgrind - full analysis including stack errors
+valgrind-full: debug
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes \
+		--verbose --log-file=valgrind.log ./$(TARGET)
+	@echo "Valgrind log saved to valgrind.log"
+
+# Run with GDB
+gdb: debug
+	gdb -ex "set confirm off" -ex "run" -ex "bt full" ./$(TARGET)
+
+# Run with GDB under reduced stack limit (to reproduce ulimit crash)
+gdb-ulimit: debug
+	bash -c 'ulimit -s 8192 && gdb -ex "set confirm off" -ex "run" -ex "bt full" ./$(TARGET)'
+
+# Run with reduced stack limit to reproduce crash
+run-ulimit: debug
+	bash -c 'ulimit -s 8192 && ./$(TARGET)'
+
+# Analyze stack usage (requires -fstack-usage flag)
+stack-analysis: CFLAGS += -g -DDEBUG -O0 -fstack-usage
+stack-analysis: clean $(TARGET)
+	@echo "Stack usage files (.su) generated in obj/"
+	@echo "Functions with largest stack usage:"
+	@find $(OBJDIR) -name "*.su" -exec cat {} \; | sort -t: -k2 -n -r | head -20
+
 # Format source files (requires clang-format)
 format:
 	find $(SRCDIR) $(INCDIR) -name "*.c" -o -name "*.h" | xargs clang-format -i
@@ -132,16 +157,21 @@ help:
 	@echo "AIshA Makefile - Advanced Intelligent Shell Assistant"
 	@echo ""
 	@echo "Targets:"
-	@echo "  all       - Build the shell (default)"
-	@echo "  debug     - Build with debug symbols"
-	@echo "  release   - Build with optimizations"
-	@echo "  clean     - Remove build artifacts"
-	@echo "  install   - Install to /usr/local/bin"
-	@echo "  run       - Build and run the shell"
-	@echo "  memcheck  - Run with valgrind"
-	@echo "  format    - Format source code"
-	@echo "  loc       - Count lines of code by module"
-	@echo "  structure - Show source tree"
-	@echo "  help      - Show this help"
+	@echo "  all            - Build the shell (default)"
+	@echo "  debug          - Build with debug symbols"
+	@echo "  release        - Build with optimizations"
+	@echo "  clean          - Remove build artifacts"
+	@echo "  install        - Install to /usr/local/bin"
+	@echo "  run            - Build and run the shell"
+	@echo "  memcheck       - Run with valgrind (basic)"
+	@echo "  valgrind-full  - Run with valgrind (detailed, logs to file)"
+	@echo "  gdb            - Run with GDB debugger"
+	@echo "  gdb-ulimit     - Run with GDB under ulimit -s 8192"
+	@echo "  run-ulimit     - Run with ulimit -s 8192 (to reproduce crash)"
+	@echo "  stack-analysis - Analyze stack usage per function"
+	@echo "  format         - Format source code"
+	@echo "  loc            - Count lines of code by module"
+	@echo "  structure      - Show source tree"
+	@echo "  help           - Show this help"
 
-.PHONY: all clean debug release install uninstall run memcheck format loc structure help
+.PHONY: all clean debug release install uninstall run memcheck valgrind-full gdb gdb-ulimit run-ulimit stack-analysis format loc structure help

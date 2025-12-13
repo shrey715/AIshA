@@ -412,18 +412,27 @@ static int validate_shell_cmd(const token_t tokens[], int token_count) {
 }
 
 int shell_validate_syntax(const char* input) {
-    token_t tokens[MAX_TOKENS];
+    token_t* tokens = malloc(MAX_TOKENS * sizeof(token_t));
+    if (!tokens) {
+        fprintf(stderr, "Memory allocation error\n");
+        return PARSE_SYNTAX_ERROR;
+    }
+    
     int token_count = tokenize_input(input, tokens, MAX_TOKENS);
     
     if (token_count < 0) {
         fprintf(stderr, "Tokenization error\n");
+        free(tokens);
         return PARSE_SYNTAX_ERROR;
     }
     
     if (token_count >= MAX_TOKENS) {
         fprintf(stderr, "Too many tokens\n");
+        free(tokens);
         return PARSE_TOO_MANY_TOKENS;
     }
     
-    return validate_shell_cmd(tokens, token_count);
+    int result = validate_shell_cmd(tokens, token_count);
+    free(tokens);
+    return result;
 }

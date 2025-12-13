@@ -84,13 +84,19 @@ int builtin_log(char** args, int argc) {
             return 1;
         }
         
-        token_t tokens[MAX_TOKENS];
+        token_t* tokens = malloc(MAX_TOKENS * sizeof(token_t));
+        if (!tokens) {
+            print_error("history: memory allocation failed\n");
+            free(expanded);
+            return 1;
+        }
         int token_count = tokenize_input(expanded, tokens, MAX_TOKENS);
         int result = 0;
         if (token_count > 0) {
             result = execute_shell_command_with_operators(tokens, token_count);
         }
         
+        free(tokens);
         free(expanded);
         return result;
     }

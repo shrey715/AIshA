@@ -311,11 +311,14 @@ int builtin_source(char** args, int argc) {
             line[len - 1] = '\0';
         }
         
-        token_t tokens[MAX_TOKENS];
+        token_t* tokens = malloc(MAX_TOKENS * sizeof(token_t));
+        if (!tokens) continue;
+        
         int token_count = tokenize_input(line, tokens, MAX_TOKENS);
         if (token_count > 0) {
             last_status = execute_shell_command_with_operators(tokens, token_count);
         }
+        free(tokens);
     }
     
     fclose(file);

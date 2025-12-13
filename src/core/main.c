@@ -91,8 +91,13 @@ int main(int argc, char* argv[]) {
             continue;
         }
         
-        /* Tokenize */
-        token_t tokens[MAX_TOKENS];
+        /* Tokenize - heap allocated to avoid stack overflow */
+        token_t* tokens = malloc(MAX_TOKENS * sizeof(token_t));
+        if (!tokens) {
+            free(processed);
+            free(input_str);
+            continue;
+        }
         int token_count = tokenize_input(processed, tokens, MAX_TOKENS);
         
         /* Check for log/history command (don't add to persistent history) */
@@ -119,6 +124,7 @@ int main(int argc, char* argv[]) {
             log_add_command(input_str);
         }
         
+        free(tokens);
         free(processed);
         free(input_str);
     }
@@ -159,10 +165,13 @@ static void load_rc_file(const char* path) {
         /* Pre-process and execute */
         char* processed = preprocess_input(line);
         if (processed) {
-            token_t tokens[MAX_TOKENS];
-            int token_count = tokenize_input(processed, tokens, MAX_TOKENS);
-            if (token_count > 0) {
-                execute_shell_command_with_operators(tokens, token_count);
+            token_t* tokens = malloc(MAX_TOKENS * sizeof(token_t));
+            if (tokens) {
+                int token_count = tokenize_input(processed, tokens, MAX_TOKENS);
+                if (token_count > 0) {
+                    execute_shell_command_with_operators(tokens, token_count);
+                }
+                free(tokens);
             }
             free(processed);
         }
